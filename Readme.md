@@ -1,160 +1,360 @@
-# 📅 Day 8 – Expense Tracker API
+# 📚 Bookmark Manager Backend API
 
-**(Dates, Aggregation & Analytics Thinking)**
-
-Day 8 marks the transition from **CRUD-only development** to **real backend engineering**.  
-This project focuses on **data filtering, aggregation, and business insights**, which are core to finance and SaaS backends.
-
----
-
-## 🚀 Project Overview
-
-A **User-based Expense Tracker Backend** where:
-
-- Each user tracks personal expenses
-- Expenses are filtered by date and category
-- Backend computes **monthly insights**
-- Strong focus on **authorization & analytics**, not UI
-
-❌ No frontend  
-❌ No charts  
-❌ No overengineering  
-✅ Backend logic first
+A **production-ready backend API** for managing bookmarks, built with
+**Node.js, Express, MongoDB, and JWT authentication**.\
+This project is part of the **30 Days -- One Night MERN Projects
+Challenge (Day 9)** and focuses on **secure CRUD, pagination, filtering,
+search, and performance optimization**.
 
 ---
 
-## 🧠 What You Learn
+## 🚀 Features
 
-### Backend Concepts
+### 🔐 Authentication & Security
 
-- Date handling in MongoDB
-- Query filtering using `$gte` & `$lte`
-- Aggregation pipelines (`$match`, `$group`, `$sum`)
-- Analytics & business-logic APIs
+- User Signup & Login (JWT-based authentication)
+- Password hashing with **bcrypt**
+- Protected routes using JWT middleware
+- Ownership-based access control (users can only access their own
+  bookmarks)
 
-### MongoDB / Mongoose
+### 📌 Bookmark Management (CRUD)
 
-- Difference between `find()` and `aggregate()`
-- ObjectId casting in aggregation
-- Schema design for analytics
-- Category-wise grouping
+- **Create** a bookmark
+- **Read** bookmarks (single & list)
+- **Update** bookmark (partial updates supported)
+- **Delete** bookmark
 
-### Security
+### 📄 Read System (Day 9 Focus)
 
-- JWT authentication
-- Ownership-based authorization
-- Protecting financial data
+- Pagination (`page`, `limit`)
+- Filtering (`favorite`, `tag`)
+- Search (title, url, tags)
+- Sorting (by `createdAt`)
+- Secure single bookmark fetch
+
+### ⚡ Performance
+
+- MongoDB Indexing for fast queries
+- Query validation & limits
+- Optimized pagination
 
 ---
 
-## 📦 Features Implemented
+## 🧠 Architecture Overview
 
-### 1️⃣ Authentication (Reused from Day 7)
-
-- Signup
-- Login
-- JWT protected routes
+    Client (Postman / Frontend)
+          ↓
+    JWT Auth Middleware
+          ↓
+    Controller (Routes)
+          ↓
+    Query Builder (Filters, Search, Pagination)
+          ↓
+    MongoDB (Indexed Queries)
+          ↓
+    JSON Response
 
 ---
 
-### 2️⃣ Expense CRUD (User-Specific)
+## 🏗️ Tech Stack
 
-#### Expense Schema
+Tech Purpose
+
+---
+
+Node.js Runtime
+Express.js API framework
+MongoDB Database
+Mongoose ODM
+JWT Authentication
+bcrypt Password hashing
+Nodemon Development server
+
+---
+
+## 📂 Folder Structure
+
+    Backend/
+    │
+    ├── src/
+    │   ├── controllers/
+    │   │   └── bookMark.controller.js
+    │   ├── models/
+    │   │   └── bookMark.model.js
+    │   ├── routes/
+    │   │   └── bookmark.routes.js
+    │   ├── middleware/
+    │   │   └── auth.middleware.js
+    │   └── index.js
+    │
+    ├── .env
+    ├── package.json
+    └── README.md
+
+---
+
+## 🔧 Environment Variables
+
+Create a `.env` file in the root:
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+```
+
+---
+
+## ▶️ Run the Project
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Start Development Server
+
+```bash
+npm run dev
+```
+
+Server runs on:
+
+    http://localhost:5000
+
+---
+
+## 🔐 Authentication Flow
+
+### 1️⃣ Register
+
+**POST**
+
+    /api/v1/auth/register
+
+Body:
 
 ```json
 {
-  "user": "ObjectId",
-  "title": "String",
-  "category": "String",
-  "amount": "Number",
-  "date": "Date",
-  "createdAt": "Date"
+  "name": "Sabya",
+  "email": "sabya@test.com",
+  "password": "123456"
 }
 ```
 
-#### Endpoints
+### 2️⃣ Login
 
-```
-POST   /api/v1/expenses
-PUT    /api/v1/expenses/:id
-DELETE /api/v1/expenses/:id
-```
+**POST**
 
-Only the **owner** can update or delete expenses.
+    /api/v1/auth/login
 
----
+Body:
 
-### 3️⃣ Fetch Expenses by Date Range
-
-```
-GET /api/v1/expenses/range?month=1&year=2026
+```json
+{
+  "email": "sabya@test.com",
+  "password": "123456"
+}
 ```
 
-Optional category filter:
-
-```
-GET /api/v1/expenses/range?month=1&year=2026&category=Food
-```
-
-**Concepts Used**
-
-- Query parameters
-- Date range filtering
-- `$gte` / `$lte`
-- Sorting (latest first)
-
----
-
-### 4️⃣ 🔥 Expense Insights (Aggregation)
-
-```
-GET /api/v1/expenses/insights?month=1&year=2026
-```
-
-#### Sample Response
+Response:
 
 ```json
 {
   "success": true,
-  "totalExpense": 7300,
-  "categoryBreakdown": {
-    "Food": 300,
-    "Travel": 2800,
-    "Shopping": 1200
-  }
+  "token": "JWT_TOKEN_HERE"
 }
 ```
 
-#### Aggregation Pipeline
+---
 
-- `$match` → filter by user & date
-- `$group` → group by category
-- `$sum` → calculate totals
+## 🛡️ Authorization Setup (Postman)
 
-This is where **CRUD ends and analytics begins**.
+Add this header to all requests:
+
+    Authorization: Bearer YOUR_JWT_TOKEN
 
 ---
 
-## 🧠 Key Takeaways
+## 📌 API Endpoints
 
-- CRUD stores data, **aggregation explains data**
-- Backend should return **insights**, not raw rows
-- `find()` auto-casts ObjectId, `aggregate()` does not
-- Filters belong in **query parameters**
-- Authorization is mandatory for financial data
+### ➕ Create Bookmark
+
+**POST**
+
+    /api/v1/bookmarks
+
+Body:
+
+```json
+{
+  "title": "Google",
+  "url": "https://google.com",
+  "tags": ["search", "tech"],
+  "isFavorite": true
+}
+```
 
 ---
 
-## ✅ Day 8 Outcome
+### 📄 Get All Bookmarks (Pagination + Filter + Search)
 
-After Day 8, you can confidently:
+**GET**
 
-- Build finance-style backends
-- Write analytics APIs
-- Handle real business queries
-- Think like a backend engineer
+    /api/v1/bookmarks?page=1&limit=5&favorite=true&tag=tech&search=google
+
+Response:
+
+```json
+{
+  "success": true,
+  "page": 1,
+  "limit": 5,
+  "totalResults": 10,
+  "totalPages": 2,
+  "data": []
+}
+```
 
 ---
 
-**Day 8 Complete 🚀**  
-_Backend logic over visuals. Analytics over CRUD._
+### 🔍 Get Single Bookmark
+
+**GET**
+
+    /api/v1/bookmarks/:id
+
+---
+
+### ✏️ Update Bookmark
+
+**PATCH**
+
+    /api/v1/bookmarks/:id
+
+Body:
+
+```json
+{
+  "title": "Google Search Engine",
+  "isFavorite": false
+}
+```
+
+---
+
+### ❌ Delete Bookmark
+
+**DELETE**
+
+    /api/v1/bookmarks/:id
+
+---
+
+## 📊 Pagination Logic
+
+### Formula
+
+    skip = (page - 1) × limit
+
+### Example
+
+    page=2, limit=5 → skip=5
+
+This means: \> Skip first 5 bookmarks, return next 5
+
+---
+
+## 🔎 Search Logic
+
+Uses MongoDB `$or` + `$regex`:
+
+```js
+query.$or = [
+  { title: { $regex: search, $options: "i" } },
+  { url: { $regex: search, $options: "i" } },
+  { tags: { $regex: search, $options: "i" } },
+];
+```
+
+---
+
+## ⚡ Performance Indexes
+
+```js
+markerSchema.index({ user: 1, createdAt: -1 });
+markerSchema.index({ title: "text", url: "text", tags: "text" });
+```
+
+These improve: - Pagination speed - Search performance - Sorting
+efficiency
+
+---
+
+## 🧪 Testing Checklist
+
+Feature Status
+
+---
+
+Signup/Login ✅
+JWT Auth ✅
+Create Bookmark ✅
+Pagination ✅
+Filtering ✅
+Search ✅
+Ownership Protection ✅
+Update/Delete ✅
+
+---
+
+## 🧠 Engineering Concepts Learned
+
+- REST API Design
+- JWT Authentication & Authorization
+- Ownership-based access control
+- Pagination & Filtering
+- MongoDB Indexing
+- Secure API Design
+- Scalable Query Architecture
+
+---
+
+## 🎯 Portfolio Statement
+
+> "I built a secure, paginated, searchable, and filterable REST API
+> using Node.js, Express, MongoDB, and JWT with performance optimization
+> using indexing and ownership-based authorization."
+
+---
+
+## 📅 Challenge Progress
+
+**Day 9 -- Backend Read System** - CRUD completed - Secure API design -
+Pagination & Search - Performance indexing - Professional testing flow
+
+---
+
+## 👨‍💻 Author
+
+**Sabya Sachin Mohanta**\
+B.Tech IT \| MERN Stack Developer\
+India 🇮🇳
+
+---
+
+## ⭐ Future Improvements
+
+- Redis caching
+- Swagger API docs
+- Docker support
+- Rate limiting
+- Role-based access (Admin/User)
+
+---
+
+## 📜 License
+
+MIT License -- Free to use and modify

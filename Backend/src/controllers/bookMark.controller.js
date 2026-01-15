@@ -1,4 +1,4 @@
-import { MarkerSchema } from "../models/bookMark.model";
+import { MarkerSchema } from "../models/bookMark.model.js";
 
 const addMark = async (req, res) => {
   try {
@@ -108,3 +108,87 @@ const updateMark = async (req, res) => {
     });
   }
 };
+const getMarks = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // Validate query params
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(50, Number(req.query.limit) || 10);
+    const skip = (page - 1) * limit;
+
+    const { tag, favorite, search, sort = "createdAt" } = req.query;
+
+    // Base query (ownership)
+    const query = { user: userId };
+
+    // Filtering
+    if (tag) {
+      query.tags = tag;
+    }
+
+    if (favorite !== undefined) {
+      query.isFavorite = favorite === "true";
+    }
+
+    // Search
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { url: { $regex: search, $options: "i" } },
+        { tags: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Fetch paginated results
+    const marks = await MarkerSchema.find(query)
+      .sort({ [sort]: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    // Count total
+    const total = await MarkerSchema.countDocuments(query);
+
+    return res.status(200).json({
+      success: true,
+      page,
+      limit,
+      totalResults: total,
+      totalPages: Math.ceil(total / limit),
+      data: marks,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch bookmarks",
+    });
+  }
+};
+
+const getMarkById = async (req, res) => {
+  try {
+    const mark = await MarkerSchema.findOne({
+      _id: req.params.id,
+      user: req.user.userId,
+    });
+
+    if (!mark) {
+      return res.status(404).json({
+        success: false,
+        message: "Bookmark not found or not authorized",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: mark,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid bookmark ID",
+    });
+  }
+};
+
+export { addMark, deleteMark, updateMark, getMarkById, getMarks };
